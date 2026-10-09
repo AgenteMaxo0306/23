@@ -128,13 +128,14 @@
         await video.play();
 
         video.style.display = "block";
-        cubo.style.display = "block";
+        document.getElementById("objeto3d").style.display = "block";
         inicio.style.display = "none";
         estado.textContent = "Objeto 3D activo";
 
       } catch (e) {
         error.textContent = "No se pudo abrir la cámara: " + e.message;
       }
+      
     };
   </script>
 </body>
