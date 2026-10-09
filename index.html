@@ -246,26 +246,36 @@
         estado.textContent =
           "Big Data + Realidad Aumentada activa";
 
-      } catch (e) {
-        let mensaje = e.message;
+      } } catch (e) {
+        console.error("Error de cámara:", e.name, e.message);
 
-        if (e.name === "NotAllowedError") {
-          mensaje =
-            "Permiso de cámara denegado. Habilitalo en el navegador.";
+        if (
+          e.name === "NotAllowedError" ||
+          e.name === "PermissionDeniedError"
+        ) {
+          error.textContent =
+            "La cámara está bloqueada. " +
+            "Permití el acceso a la cámara desde los ajustes " +
+            "del navegador y después recargá esta página.";
         } else if (e.name === "NotFoundError") {
-          mensaje = "No se encontró una cámara disponible.";
+          error.textContent =
+            "No se encontró una cámara disponible en el celular.";
         } else if (e.name === "NotReadableError") {
-          mensaje =
-            "La cámara está ocupada por otra aplicación.";
+          error.textContent =
+            "La cámara está ocupada. Cerrá otras aplicaciones e intentá de nuevo.";
+        } else if (e.name === "SecurityError") {
+          error.textContent =
+            "El navegador bloqueó el acceso. Verificá HTTPS y los permisos.";
+        } else {
+          error.textContent =
+            "No se pudo abrir la cámara (" + e.name + "). " +
+            "Revisá los permisos del navegador.";
         }
 
-        error.textContent = "No se pudo abrir la cámara: " + mensaje;
         estado.textContent = "";
       } finally {
         botonAbrir.disabled = false;
         botonAbrir.textContent = "ABRIR CÁMARA Y 3D";
-      }
-    });
 
     // Cerrar la cámara
     botonCerrar.addEventListener("click", () => {
