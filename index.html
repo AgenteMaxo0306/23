@@ -1,0 +1,295 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06152b">
+
+  <title>Big Data + Realidad Aumentada</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #06152b;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Cámara del celular */
+    #video {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      z-index: 0;
+      background: #06152b;
+    }
+
+    /* Imagen de Big Data */
+    #objeto3d {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: min(94vw, 800px);
+      max-height: 78vh;
+      object-fit: contain;
+      transform: translate(-50%, -50%);
+      display: none;
+      z-index: 2;
+      filter: drop-shadow(0 0 20px #008cff);
+      animation: flotar 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Efecto de flotación y profundidad */
+    @keyframes flotar {
+      0%, 100% {
+        transform:
+          translate(-50%, -50%)
+          perspective(1000px)
+          rotateY(-3deg)
+          translateY(0);
+      }
+
+      50% {
+        transform:
+          translate(-50%, -53%)
+          perspective(1000px)
+          rotateY(3deg)
+          translateY(-8px);
+      }
+    }
+
+    /* Pantalla de inicio */
+    #inicio {
+      position: relative;
+      z-index: 5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      text-align: center;
+      background:
+        radial-gradient(
+          circle at center,
+          #063b70 0%,
+          #06152b 70%
+        );
+    }
+
+    h1 {
+      color: #54d8ff;
+      font-size: clamp(26px, 7vw, 42px);
+      margin-bottom: 10px;
+      text-shadow: 0 0 18px #008cff;
+    }
+
+    #inicio p {
+      line-height: 1.5;
+      max-width: 420px;
+    }
+
+    button {
+      padding: 16px 22px;
+      border: 1px solid #54d8ff;
+      border-radius: 12px;
+      background: #008cff;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 18px;
+      box-shadow: 0 0 20px #008cff88;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    /* Mensajes de estado */
+    #estado {
+      position: fixed;
+      z-index: 4;
+      bottom: 18px;
+      left: 0;
+      width: 100%;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      text-shadow: 0 2px 5px black;
+      pointer-events: none;
+    }
+
+    #error {
+      color: #ffb3b3;
+      overflow-wrap: anywhere;
+    }
+
+    /* Botón para cerrar la cámara */
+    #cerrar {
+      position: fixed;
+      z-index: 6;
+      top: 16px;
+      right: 16px;
+      margin: 0;
+      padding: 11px 15px;
+      display: none;
+      background: #071a30dd;
+    }
+
+    @media (max-width: 480px) {
+      #objeto3d {
+        width: 96vw;
+        max-height: 70vh;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #objeto3d {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Cámara -->
+  <video id="video" autoplay playsinline muted></video>
+
+  <!-- Imagen superpuesta -->
+  <img
+    id="objeto3d"
+    src="bigdata.png"
+    alt="Maqueta 3D de Big Data y Realidad Aumentada"
+  >
+
+  <!-- Inicio -->
+  <main id="inicio">
+    <h1>BIG DATA + REALIDAD AUMENTADA</h1>
+
+    <p>
+      Visualización y simulación de datos masivos.
+      Activá la cámara para ver la maqueta futurista
+      superpuesta al entorno real.
+    </p>
+
+    <button id="abrir" type="button">
+      ABRIR CÁMARA Y 3D
+    </button>
+
+    <p id="error" role="status" aria-live="polite"></p>
+  </main>
+
+  <button id="cerrar" type="button">
+    CERRAR CÁMARA
+  </button>
+
+  <div id="estado" aria-live="polite"></div>
+
+  <script>
+    const video = document.getElementById("video");
+    const objeto3d = document.getElementById("objeto3d");
+    const inicio = document.getElementById("inicio");
+    const botonAbrir = document.getElementById("abrir");
+    const botonCerrar = document.getElementById("cerrar");
+    const error = document.getElementById("error");
+    const estado = document.getElementById("estado");
+
+    let flujo = null;
+
+    // Abrir la cámara tras pulsar el botón
+    botonAbrir.addEventListener("click", async () => {
+      error.textContent = "";
+      estado.textContent = "";
+      botonAbrir.disabled = true;
+      botonAbrir.textContent = "ABRIENDO CÁMARA...";
+
+      try {
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+          throw new Error(
+            "Abrí esta página desde un enlace HTTPS en tu celular."
+          );
+        }
+
+        // Solicitar cámara trasera
+        flujo = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+
+        video.srcObject = flujo;
+        await video.play();
+
+        // Mostrar la cámara y la imagen
+        video.style.display = "block";
+        objeto3d.style.display = "block";
+        inicio.style.display = "none";
+        botonCerrar.style.display = "block";
+
+        estado.textContent =
+          "Big Data + Realidad Aumentada activa";
+
+      } catch (e) {
+        let mensaje = e.message;
+
+        if (e.name === "NotAllowedError") {
+          mensaje =
+            "Permiso de cámara denegado. Habilitalo en el navegador.";
+        } else if (e.name === "NotFoundError") {
+          mensaje = "No se encontró una cámara disponible.";
+        } else if (e.name === "NotReadableError") {
+          mensaje =
+            "La cámara está ocupada por otra aplicación.";
+        }
+
+        error.textContent = "No se pudo abrir la cámara: " + mensaje;
+        estado.textContent = "";
+      } finally {
+        botonAbrir.disabled = false;
+        botonAbrir.textContent = "ABRIR CÁMARA Y 3D";
+      }
+    });
+
+    // Cerrar la cámara
+    botonCerrar.addEventListener("click", () => {
+      if (flujo) {
+        flujo.getTracks().forEach(track => track.stop());
+        flujo = null;
+      }
+
+      video.srcObject = null;
+      video.style.display = "none";
+      objeto3d.style.display = "none";
+      botonCerrar.style.display = "none";
+      inicio.style.display = "flex";
+      estado.textContent = "";
+      error.textContent = "";
+    });
+
+    // Avisar si falta la imagen
+    objeto3d.addEventListener("error", () => {
+      error.textContent =
+        "No se encontró bigdata.png. Subí la imagen a la misma carpeta que index.html.";
+    });
+  </script>
+
+</body>
+</html>
+```
