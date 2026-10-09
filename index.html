@@ -1,12 +1,9 @@
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#06152b">
-
-  <title>Big Data + Realidad Aumentada</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Big Data y Realidad Aumentada</title>
 
   <style>
     * {
@@ -15,101 +12,38 @@
 
     body {
       margin: 0;
-      overflow: hidden;
-      background: #06152b;
+      min-height: 100vh;
+      background: #101010;
       color: white;
       font-family: Arial, sans-serif;
-    }
-
-    /* Cámara del celular */
-    #video {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: none;
-      z-index: 0;
-      background: #06152b;
-    }
-
-    /* Imagen de Big Data */
-    #objeto3d {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: min(94vw, 800px);
-      max-height: 78vh;
-      object-fit: contain;
-      transform: translate(-50%, -50%);
-      display: none;
-      z-index: 2;
-      filter: drop-shadow(0 0 20px #008cff);
-      animation: flotar 5s ease-in-out infinite;
-      pointer-events: none;
-    }
-
-    /* Efecto de flotación y profundidad */
-    @keyframes flotar {
-      0%, 100% {
-        transform:
-          translate(-50%, -50%)
-          perspective(1000px)
-          rotateY(-3deg)
-          translateY(0);
-      }
-
-      50% {
-        transform:
-          translate(-50%, -53%)
-          perspective(1000px)
-          rotateY(3deg)
-          translateY(-8px);
-      }
-    }
-
-    /* Pantalla de inicio */
-    #inicio {
-      position: relative;
-      z-index: 5;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 24px;
       text-align: center;
-      background:
-        radial-gradient(
-          circle at center,
-          #063b70 0%,
-          #06152b 70%
-        );
+    }
+
+    header {
+      padding: 35px 15px 20px;
     }
 
     h1 {
-      color: #54d8ff;
-      font-size: clamp(26px, 7vw, 42px);
-      margin-bottom: 10px;
-      text-shadow: 0 0 18px #008cff;
+      font-size: clamp(30px, 7vw, 48px);
+      margin-bottom: 20px;
     }
 
-    #inicio p {
+    header p {
+      font-size: 18px;
       line-height: 1.5;
-      max-width: 420px;
+      color: #dddddd;
     }
 
     button {
-      padding: 16px 22px;
-      border: 1px solid #54d8ff;
-      border-radius: 12px;
-      background: #008cff;
-      color: white;
-      font-size: 16px;
+      background: #50dfbd;
+      color: #071a16;
+      border: none;
+      border-radius: 18px;
+      padding: 20px 28px;
+      margin: 15px auto;
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 18px;
-      box-shadow: 0 0 20px #008cff88;
     }
 
     button:disabled {
@@ -117,189 +51,254 @@
       cursor: wait;
     }
 
-    /* Mensajes de estado */
-    #estado {
-      position: fixed;
-      z-index: 4;
-      bottom: 18px;
-      left: 0;
-      width: 100%;
-      padding: 12px;
-      text-align: center;
-      font-size: 14px;
-      text-shadow: 0 2px 5px black;
-      pointer-events: none;
-    }
-
     #error {
-      color: #ffb3b3;
+      color: #ff8585;
+      padding: 0 20px;
       overflow-wrap: anywhere;
     }
 
-    /* Botón para cerrar la cámara */
-    #cerrar {
-      position: fixed;
-      z-index: 6;
-      top: 16px;
-      right: 16px;
-      margin: 0;
-      padding: 11px 15px;
+    #estado {
+      color: #50dfbd;
+      padding: 0 20px;
+    }
+
+    #visor {
       display: none;
-      background: #071a30dd;
+      position: relative;
+      width: 100%;
+      height: 65vh;
+      min-height: 350px;
+      max-height: 700px;
+      overflow: hidden;
+      background: #000;
+      margin-top: 15px;
     }
 
-    @media (max-width: 480px) {
-      #objeto3d {
-        width: 96vw;
-        max-height: 70vh;
+    #video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    #objeto3d {
+      display: none;
+      position: absolute;
+      width: min(82%, 450px);
+      max-height: 75%;
+      object-fit: contain;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      filter: drop-shadow(0 0 18px #42e8cb);
+      animation: flotar 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes flotar {
+      0%, 100% {
+        transform: translate(-50%, -50%);
+      }
+      50% {
+        transform: translate(-50%, calc(-50% - 15px));
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      #objeto3d {
-        animation: none;
-      }
+    .nota {
+      padding: 15px 20px 30px;
+      color: #bbbbbb;
+      font-size: 14px;
     }
   </style>
 </head>
 
 <body>
-
-  <!-- Cámara -->
-  <video id="video" autoplay playsinline muted></video>
-
-  <!-- Imagen superpuesta -->
-  <img
-    id="objeto3d"
-    src="bigdata.png"
-    alt="Maqueta 3D de Big Data y Realidad Aumentada"
-  >
-
-  <!-- Inicio -->
-  <main id="inicio">
-    <h1>BIG DATA + REALIDAD AUMENTADA</h1>
-
+  <header>
+    <h1>Big Data y Realidad Aumentada</h1>
     <p>
-      Visualización y simulación de datos masivos.
-      Activá la cámara para ver la maqueta futurista
-      superpuesta al entorno real.
+      Activá la cámara para visualizar un objeto digital
+      superpuesto al entorno real.
     </p>
 
-    <button id="abrir" type="button">
+    <button id="botonAbrir" type="button">
       ABRIR CÁMARA Y 3D
     </button>
 
-    <p id="error" role="status" aria-live="polite"></p>
+    <p id="estado" role="status"></p>
+    <p id="error" role="alert"></p>
+  </header>
+
+  <main>
+    <div id="visor">
+      <video id="video" autoplay muted playsinline></video>
+
+      <!-- La imagen debe estar guardada con este nombre -->
+      <img
+        id="objeto3d"
+        src="bigdata.png"
+        alt="Modelo visual de Big Data y realidad aumentada"
+      >
+    </div>
+
+    <button id="botonCerrar" type="button" hidden>
+      CERRAR CÁMARA
+    </button>
+
+    <p class="nota">
+      Para utilizar la cámara, abrí esta página mediante HTTPS
+      y aceptá el permiso cuando el navegador lo solicite.
+    </p>
   </main>
 
-  <button id="cerrar" type="button">
-    CERRAR CÁMARA
-  </button>
-
-  <div id="estado" aria-live="polite"></div>
-
   <script>
+    const botonAbrir = document.getElementById("botonAbrir");
+    const botonCerrar = document.getElementById("botonCerrar");
     const video = document.getElementById("video");
     const objeto3d = document.getElementById("objeto3d");
-    const inicio = document.getElementById("inicio");
-    const botonAbrir = document.getElementById("abrir");
-    const botonCerrar = document.getElementById("cerrar");
-    const error = document.getElementById("error");
+    const visor = document.getElementById("visor");
     const estado = document.getElementById("estado");
+    const error = document.getElementById("error");
 
-    let flujo = null;
+    let flujoCamara = null;
+    let iniciando = false;
 
-    // Abrir la cámara tras pulsar el botón
-    botonAbrir.addEventListener("click", async () => {
-      error.textContent = "";
-      estado.textContent = "";
+    async function abrirCamara() {
+      if (iniciando) return;
+      iniciando = true;
+
       botonAbrir.disabled = true;
-      botonAbrir.textContent = "ABRIENDO CÁMARA...";
+      error.textContent = "";
+      estado.textContent = "Solicitando acceso a la cámara...";
 
       try {
         if (!navigator.mediaDevices ||
             !navigator.mediaDevices.getUserMedia) {
           throw new Error(
-            "Abrí esta página desde un enlace HTTPS en tu celular."
+            "La cámara no está disponible. Abrí la página con HTTPS en Chrome o Safari."
           );
         }
 
-        // Solicitar cámara trasera
-        flujo = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        });
-
-        video.srcObject = flujo;
-        await video.play();
-
-        // Mostrar la cámara y la imagen
-        video.style.display = "block";
-        objeto3d.style.display = "block";
-        inicio.style.display = "none";
-        botonCerrar.style.display = "block";
-
-        estado.textContent =
-          "Big Data + Realidad Aumentada activa";
-
-      } } catch (e) {
-        console.error("Error de cámara:", e.name, e.message);
-
-        if (
-          e.name === "NotAllowedError" ||
-          e.name === "PermissionDeniedError"
-        ) {
-          error.textContent =
-            "La cámara está bloqueada. " +
-            "Permití el acceso a la cámara desde los ajustes " +
-            "del navegador y después recargá esta página.";
-        } else if (e.name === "NotFoundError") {
-          error.textContent =
-            "No se encontró una cámara disponible en el celular.";
-        } else if (e.name === "NotReadableError") {
-          error.textContent =
-            "La cámara está ocupada. Cerrá otras aplicaciones e intentá de nuevo.";
-        } else if (e.name === "SecurityError") {
-          error.textContent =
-            "El navegador bloqueó el acceso. Verificá HTTPS y los permisos.";
-        } else {
-          error.textContent =
-            "No se pudo abrir la cámara (" + e.name + "). " +
-            "Revisá los permisos del navegador.";
+        // Evita mantener una cámara anterior activa.
+        if (flujoCamara) {
+          flujoCamara.getTracks().forEach(track => track.stop());
+          flujoCamara = null;
         }
 
-        estado.textContent = "";
-      } finally {
-        botonAbrir.disabled = false;
-        botonAbrir.textContent = "ABRIR CÁMARA Y 3D";
+        video.pause();
+        video.srcObject = null;
 
-    // Cerrar la cámara
-    botonCerrar.addEventListener("click", () => {
-      if (flujo) {
-        flujo.getTracks().forEach(track => track.stop());
-        flujo = null;
+        const nuevoFlujo =
+          await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            }
+          });
+
+        flujoCamara = nuevoFlujo;
+        video.srcObject = nuevoFlujo;
+
+        // Espera a que el video esté listo antes de reproducirlo.
+        await new Promise((resolve, reject) => {
+          if (video.readyState >= 1) {
+            resolve();
+            return;
+          }
+
+          const alCargar = () => {
+            limpiar();
+            resolve();
+          };
+
+          const alFallar = () => {
+            limpiar();
+            reject(new Error("No se pudo preparar el video de la cámara."));
+          };
+
+          function limpiar() {
+            video.removeEventListener("loadedmetadata", alCargar);
+            video.removeEventListener("error", alFallar);
+          }
+
+          video.addEventListener("loadedmetadata", alCargar, { once: true });
+          video.addEventListener("error", alFallar, { once: true });
+        });
+
+        // Se ejecuta una sola vez por cada inicio de cámara.
+        await video.play();
+
+        visor.style.display = "block";
+        objeto3d.style.display = "block";
+        botonCerrar.hidden = false;
+        estado.textContent = "Cámara activa. Objeto visualizado.";
+
+        if (!objeto3d.complete || objeto3d.naturalWidth === 0) {
+          error.textContent =
+            "La cámara funciona, pero no se encontró bigdata.png. Revisá el nombre y la ubicación de la imagen.";
+        }
+
+      } catch (e) {
+        console.error("Error de cámara:", e.name, e.message);
+
+        if (flujoCamara) {
+          flujoCamara.getTracks().forEach(track => track.stop());
+          flujoCamara = null;
+        }
+
+        video.pause();
+        video.srcObject = null;
+        visor.style.display = "none";
+        objeto3d.style.display = "none";
+        estado.textContent = "";
+
+        if (e.name === "NotAllowedError" ||
+            e.name === "PermissionDeniedError") {
+          error.textContent =
+            "Permiso denegado. Habilitá la cámara para este sitio desde los ajustes del navegador.";
+        } else if (e.name === "NotFoundError") {
+          error.textContent =
+            "No se encontró una cámara disponible.";
+        } else if (e.name === "NotReadableError") {
+          error.textContent =
+            "La cámara está ocupada. Cerrá otras aplicaciones que la estén usando.";
+        } else if (e.name === "AbortError") {
+          error.textContent =
+            "Se interrumpió el inicio de la cámara. Cerrala, recargá la página e intentá otra vez.";
+        } else {
+          error.textContent =
+            "No se pudo abrir la cámara: " + e.message;
+        }
+
+      } finally {
+        iniciando = false;
+        botonAbrir.disabled = false;
+      }
+    }
+
+    function cerrarCamara() {
+      if (flujoCamara) {
+        flujoCamara.getTracks().forEach(track => track.stop());
+        flujoCamara = null;
       }
 
+      video.pause();
       video.srcObject = null;
-      video.style.display = "none";
+      visor.style.display = "none";
       objeto3d.style.display = "none";
-      botonCerrar.style.display = "none";
-      inicio.style.display = "flex";
-      estado.textContent = "";
+      botonCerrar.hidden = true;
+      estado.textContent = "Cámara cerrada.";
       error.textContent = "";
-    });
+    }
 
-    // Avisar si falta la imagen
+    botonAbrir.addEventListener("click", abrirCamara);
+    botonCerrar.addEventListener("click", cerrarCamara);
+
+    // Avisa si la imagen no se encuentra.
     objeto3d.addEventListener("error", () => {
       error.textContent =
-        "No se encontró bigdata.png. Subí la imagen a la misma carpeta que index.html.";
+        "No se pudo cargar bigdata.png. Comprobá que esté subida a GitHub.";
     });
   </script>
-
 </body>
 </html>
-```
